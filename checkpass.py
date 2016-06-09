@@ -1,5 +1,4 @@
 def checkpas(data):
-    l = len(data)
     a = bool(False)
     b = bool(False)
     c = bool(False)
@@ -10,7 +9,7 @@ def checkpas(data):
             b = True
         if s.islower():
             c = True
-    if l >= 10 and a and b and c:
+    if len(data) >= 10 and a and b and c:
         return True
     else:
         return False

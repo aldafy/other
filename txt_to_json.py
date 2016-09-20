@@ -35,7 +35,7 @@ def make_json_registry(in_txt, out_json):
             registry.insert(i, [])
             registry[i].append(line)
         else:
-            if line != '\r\n':
+            if line != '\r\n' and registry != []:
                 registry[i].append(line)
     for items in registry:
         items = [item.strip() for item in items]

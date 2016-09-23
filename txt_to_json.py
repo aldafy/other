@@ -35,43 +35,41 @@ def make_json_registry(in_txt, out_json):
             registry.insert(i, [])
             registry[i].append(line)
         else:
-<<<<<<< HEAD
-            if line != '\r\n' and registry != []:
-=======
-            if line != '\r\n':
->>>>>>> 5fc7586db550407e4614c5cfdbe895214d965d51
+            if line != '\r\n' and registry != [] and '=' in line:
                 registry[i].append(line)
     for items in registry:
         items = [item.strip() for item in items]
         hex_string = ''
         registry_keys = {}
-        for w in items:
-            if ',00' in w:
-                hex_string += w
+        for regkey in items:
+            if ',00' in regkey:
+                hex_string += regkey
             else:
                 if hex_string != '':
-                    block = hex_string.split('=')
-                    value = re.sub(r'hex\((2|7)\):|,00,|,00|00,|00|,|\\', r'', block[1])
+                    key, value = hex_string.split('=')
+                    value = re.sub(r'hex\((2|7)\):|,00,|,00|00,|00|,|\\', r'', value)
                     value = decode_hex(value, 'cp1251')
-                    registry_keys = dict(((block[0], value),))
+                    registry_keys = dict(((key, value),))
                     hex_string = ''
-                if 'HKLM:' not in w and w != '':
-                    block = re.split('=', w, maxsplit=1)
-                    value = re.sub(r'\\\\', r'\\', block[1])
-                    value = re.sub(r'^\\|\\$', '"', value) if re.match(r'^\\', value) else value
-                    value = re.sub(r'\\', '"', value) if re.search(r'\s\\', value) else value
+                if 'HKLM:' not in regkey and regkey != '':
+                    key, value = re.split('=', regkey, maxsplit=1)
+                    value = re.sub(r'\\\\', r'\\', value)
+                    if re.match(r'^\\', value): value = re.sub(r'^\\|\\$', '"', value)
+                    if re.search(r'\s\\', value): value = re.sub(r'\\', '"', value)
                     value = value.replace('\\ ', '" ')
-                    value = dword_decode(value) if 'dword' in value else value
-                    registry_keys[block[0]] = value
+                    if 'dword' in value: value = dword_decode(value)
+                    registry_keys[key] = value
         output[items[0]] = registry_keys
     with open(out_json, 'w') as f:
         json.dump(output, f, indent=4, separators=(',', ': '), encoding='cp1251')
 
-make_json_registry('TLS.txt', 'ttest.json')
-# make_json_registry('Пакет драйверов.txt', 'Драйверы.json')
-# make_json_registry('CSP.txt', 'CSP.json')
-print ('Файлы json созданы')
-# check_json.check_keys('Пакет драйверов.txt', 'Драйверы.json')
-check_json.check_keys('TLS.txt', 'ttest.json')
-# check_json.check_keys('CSP.txt', 'CSP.json')
-# input('Нажмите Enter для выхода...')
+
+input_txt_file = raw_input('Введите исходный txt файл: ')
+output_json_file = raw_input('Введите имя файла для json: ')
+
+try:
+    make_json_registry(input_txt_file, output_json_file)
+    print ('Файлы json созданы')
+    check_json.check_keys(input_txt_file, output_json_file)
+except IOError as e:
+    print e
